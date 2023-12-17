@@ -1,0 +1,1 @@
+/Users/aristidefumo/Documents/rust/frakt/client/target/debug/client: /Users/aristidefumo/Documents/rust/frakt/client/src/main.rs /Users/aristidefumo/Documents/rust/frakt/message/src/lib.rs /Users/aristidefumo/Documents/rust/frakt/message/src/message.rs /Users/aristidefumo/Documents/rust/frakt/message/src/send_message.rs
