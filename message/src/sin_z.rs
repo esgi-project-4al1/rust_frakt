@@ -1,55 +1,73 @@
+use std::ops::Mul;
+
 use crate::message::Complex;
 
-fn iterate_sin_z(c: Complex, max_iterations: u32, escape_radius_squared: f64) -> u32 {
-    let mut z = Complex::new(0.0, 0.0);
-    let mut iterations = 0;
-
-    while z.norm_squared() <= escape_radius_squared && iterations < max_iterations {
-        z = z.square().add(c);
-        iterations += 1;
-    }
-
-    iterations
+#[derive(Debug, Clone, Copy)]
+pub struct IteratedSinZ {
+    pub c: Complex,
 }
 
-fn generate_iterated_sin_z_fractal(width: u32, height: u32, range: f64, max_iterations: u32, escape_radius: f64) -> Vec<u8> {
-    let pixel_count = (width * height) as usize;
-    let mut fractal_pixels = vec![0; pixel_count * 3];
-
-    for (i, pixel) in fractal_pixels.chunks_mut(3).enumerate() {
-        let x = (i % width as usize) as f64;
-        let y = (i / width as usize) as f64;
-        let cx = (x - width as f64 / 2.0) * range / width as f64;
-        let cy = (y - height as f64 / 2.0) * range / height as f64;
-        let c = Complex::new(cx, cy);
-
-        let iterations = iterate_sin_z(c, max_iterations, escape_radius * escape_radius);
-        let color = iterations % 256;
-
-        pixel[0] = color as u8;
-        pixel[1] = 0;
-        pixel[2] = 0;
+impl IteratedSinZ {
+    pub fn new(c: Complex) -> IteratedSinZ {
+        IteratedSinZ { c }
     }
 
-    fractal_pixels
-}
+    pub fn compute(&self, width: u32, height: u32, threshold: f64) -> Vec<u8> {
+        let mut pixels = Vec::new();
 
+        for y in 0..height {
+            for x in 0..width {
+                let x_frac = x as f64 / width as f64;
+                let y_frac = y as f64 / height as f64;
+
+                let real = 2.0 * x_frac - 1.0;
+                let imag = 2.0 * y_frac - 1.0;
+
+                let z_0 = Complex::new(real, imag);
+                let iterations = self.compute_pixel(z_0, threshold);
+
+                // Map the number of iterations to a color intensity (you may need to adjust this)
+                let intensity = (iterations as f64 / 50.0 * 255.0).round() as u8;
+
+                pixels.push(intensity);
+            }
+        }
+
+        pixels
+    }
+
+    fn compute_pixel(&self, z_0: Complex, threshold: f64) -> usize {
+        let max_iter = 1000;  // You can adjust this value
+        let mut z_n = z_0;
+
+        for i in 0..max_iter {
+            z_n = (z_n.square()).mul(self.c).add(z_0);
+            if z_n.norm_squared() > threshold {
+                return i;
+            }
+        }
+
+        max_iter
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use crate::img::save_fractal_image;
-    use crate::sin_z::generate_iterated_sin_z_fractal;
+    use crate::message::Complex;
+    use crate::sin_z::IteratedSinZ;
 
     #[test]
-    fn test_sin_z(){
-        let width = 800;
-        let height = 600;
-        let range = 2.0;
-        let max_iterations = 1000;
-        let escape_radius = 50.0;
+    fn test_sin_z() {
+        let c1 = Complex::new(1.0, 0.3);
+        let iterated_sin_z1 = IteratedSinZ::new(c1);
+        let width: u32 = 800;
+        let height: u32 = 600;
+        let threshold = 50.0;
 
-        let pixels = generate_iterated_sin_z_fractal(width, height, range, max_iterations, escape_radius);
-        let output_path = "fractal.png";
+        let pixels = iterated_sin_z1.compute(width, height, threshold);
+
+        let output_path = "fractal_sin_z.png";
         save_fractal_image(width, height, pixels, output_path);
     }
 }

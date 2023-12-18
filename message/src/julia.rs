@@ -51,7 +51,7 @@ mod tests {
 
         let pixels = julia_fractal(width, height, range, descriptor);
         println!("{pixels:?}");
-        let output_path = "fractal.png";
+        let output_path = "fractal_julia.png";
         save_fractal_image(width, height, pixels, output_path);
     }
 

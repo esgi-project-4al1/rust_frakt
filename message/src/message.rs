@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Div, Mul, Sub};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -44,7 +44,7 @@ impl Complex {
         }
     }
 
-    pub(crate) fn norm_squared(&self) -> f64 {
+    pub fn norm_squared(&self) -> f64 {
         self.re * self.re + self.im * self.im
     }
 }
@@ -56,6 +56,37 @@ impl Add for Complex {
             re: self.re + other.re,
             im: self.im + other.im,
         }
+    }
+}
+
+impl Mul<Complex> for Complex {
+    type Output = Complex;
+
+    fn mul(self, other: Complex) -> Complex {
+        let real = self.re * other.re - self.im * other.im;
+        let imag = self.re * other.im + self.im * other.re;
+        Complex::new(real, imag)
+    }
+}
+
+impl Sub<Complex> for Complex {
+    type Output = Complex;
+
+    fn sub(self, other: Complex) -> Complex {
+        let real = self.re - other.re;
+        let imag = self.im - other.im;
+        Complex::new(real, imag)
+    }
+}
+
+impl Div<Complex> for Complex {
+    type Output = Complex;
+
+    fn div(self, other: Complex) -> Complex {
+        let denominator = other.re * other.re + other.im * other.im;
+        let real = (self.re * other.re + self.im * other.im) / denominator;
+        let imag = (self.im * other.re - self.re * other.im) / denominator;
+        Complex::new(real, imag)
     }
 }
 
