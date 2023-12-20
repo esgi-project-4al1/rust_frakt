@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::process::exit;
+use image::EncodableLayout;
 
 use crate::message::Message;
 pub fn buffer_to_object(message_buf: &mut Vec<u8>) -> Message {
@@ -83,7 +84,7 @@ pub fn send_message(mut stream: &TcpStream, message: Message, data: Option<Vec<u
             serialized
         }
     };
-    stream
+    /*stream
         .write_all(&serialized_size.to_be_bytes())
         .expect("failed to send message size");
 
@@ -107,6 +108,32 @@ pub fn send_message(mut stream: &TcpStream, message: Message, data: Option<Vec<u
         stream
             .write_all(&data.unwrap())
             .expect("failed to send data");
-    }
+    }*/
+
+    let compact_all = match data {
+        Some(data) => {
+            let serialized_size_bytes = &serialized_size.to_be_bytes() as &[u8];
+            let serialized_size_message_bytes = &serialized_size_message.to_be_bytes() as &[u8];
+            let serialized_bytes = serialized.as_bytes();
+            [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes, &data].concat()
+        },
+        None => {
+            let serialized_size_bytes = &serialized_size.to_be_bytes() as &[u8];
+            let serialized_size_message_bytes = &serialized_size_message.to_be_bytes() as &[u8];
+            let serialized_bytes = serialized.as_bytes();
+            [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes].concat()
+        }
+    };
+    match stream.write_all(&compact_all) {
+        Ok(_) => {}
+        Err(e) => {
+            if e.kind() == std::io::ErrorKind::BrokenPipe {
+                println!("Failed to send data: {}", e);
+            } else {
+                println!("Failed to send data: {}", e);
+                exit(0);
+            }
+        }
+    };
 }
 
