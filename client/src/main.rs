@@ -22,10 +22,8 @@ fn loop_message(_stream: &mut TcpStream) {
             Some(message) => {
                 match message {
                     Message::FragmentTask(task) => {
-                        println!("task: {:?}", task);
                         let fragment_result = task.calculate_fractal();
                         let message_send: Message = Message::FragmentResult(fragment_result);
-                        println!("message_send: {:?}", message_send);
                         on_message_send_result(_stream, message_send, data);
                     }
                     Message::FragmentRequest(request) => {
