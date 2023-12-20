@@ -1,5 +1,7 @@
 use crate::message::Complex;
 
+
+#[warn(dead_code)]
 fn escape_time(c: Complex, max_iter: u32) -> Option<u32> {
     let mut z = Complex::new(0.0, 0.0);
     for i in 0..max_iter {
@@ -11,6 +13,7 @@ fn escape_time(c: Complex, max_iter: u32) -> Option<u32> {
     None
 }
 
+#[warn(dead_code)]
 fn generate_mandelbrot(width: u32, height: u32) -> Vec<u8> {
     const MAX_ITERATIONS: u32 = 100;
     const ESCAPE_RADIUS_SQUARED: f64 = 4.0;
@@ -50,7 +53,6 @@ fn map_range(p0: u32, p1: i32, p2: u32, p3: f64, p4: f64) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::img::save_fractal_image;
     use crate::mandelbrot::generate_mandelbrot;
 
     #[test]
@@ -60,6 +62,6 @@ mod tests {
 
         let pixels = generate_mandelbrot(width, height);
         let output_path = "fractal_mandelbrot.png";
-        save_fractal_image(width, height, pixels, output_path);
+        //save_fractal_image(width, height, pixels, output_path);
     }
 }

@@ -8,10 +8,13 @@ pub struct IteratedSinZ {
 }
 
 impl IteratedSinZ {
+
+    #[warn(dead_code)]
     pub fn new(c: Complex) -> IteratedSinZ {
         IteratedSinZ { c }
     }
 
+    #[warn(dead_code)]
     pub fn compute(&self, width: u32, height: u32, threshold: f64) -> Vec<u8> {
         let mut pixels = Vec::new();
 
@@ -35,7 +38,7 @@ impl IteratedSinZ {
 
         pixels
     }
-
+    #[warn(dead_code)]
     fn compute_pixel(&self, z_0: Complex, threshold: f64) -> usize {
         let max_iter = 1000;  // You can adjust this value
         let mut z_n = z_0;
@@ -53,7 +56,6 @@ impl IteratedSinZ {
 
 #[cfg(test)]
 mod tests {
-    use crate::img::save_fractal_image;
     use crate::message::Complex;
     use crate::sin_z::IteratedSinZ;
 
@@ -68,6 +70,5 @@ mod tests {
         let pixels = iterated_sin_z1.compute(width, height, threshold);
 
         let output_path = "fractal_sin_z.png";
-        save_fractal_image(width, height, pixels, output_path);
     }
 }

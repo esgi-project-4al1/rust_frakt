@@ -1,5 +1,5 @@
 use crate::message::Complex;
-
+#[warn(dead_code)]
 pub fn newton_raphson(_c: Complex, width: u32, height: u32) -> Vec<u8> {
     let mut result = Vec::new();
 
@@ -29,7 +29,6 @@ pub fn newton_raphson(_c: Complex, width: u32, height: u32) -> Vec<u8> {
 }
 #[cfg(test)]
 mod tests {
-    use crate::img::save_fractal_image;
     use crate::message::Complex;
     use crate::newton::newton_raphson;
 
@@ -43,6 +42,5 @@ mod tests {
         let pixels = newton_raphson(complex, width, height);
         println!("{:?} pixels", pixels.len());
         let output_path = "fractal_newton.png";
-        save_fractal_image(width, height, pixels, output_path);
     }
 }

@@ -1,7 +1,7 @@
 use std::ops::{Add, Div, Mul, Sub};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
@@ -90,72 +90,73 @@ impl Div<Complex> for Complex {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Range {
     pub min: Point,
     pub max: Point,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Resolution {
     pub nx: u16,
     pub ny: u16,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct U8Data {
     pub offset: u32,
     pub count: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PixelData {
     pub offset: u32,
     pub count: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PixelIntensity {
     pub zn: f32,
     pub count: f32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct IteratedSinZ {
     pub c: Complex,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct JuliaDescriptor {
     pub c: Complex,
     pub divergence_threshold_square: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Mandelbrot {}
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FractalDescriptor {
     IteratedSinZ(IteratedSinZ),
-    JuliaDescriptor(JuliaDescriptor),
+    Julia(JuliaDescriptor),
     Mandelbrot(Mandelbrot),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FragmentRequest {
     pub worker_name: String,
     pub maximal_work_load: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone )]
 pub struct FragmentTask {
     pub id: U8Data,
     pub max_iteration: u16,
     pub resolution: Resolution,
     pub range: Range,
+    pub fractal: FractalDescriptor,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FragmentResult {
     pub id: U8Data,
     pub resolution: Resolution,
@@ -163,10 +164,9 @@ pub struct FragmentResult {
 
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Message {
     FragmentTask(FragmentTask),
     FragmentResult(FragmentResult),
     FragmentRequest(FragmentRequest),
 }
-
