@@ -26,9 +26,9 @@ pub fn read_message(stream: &mut TcpStream) -> (Option<Message>, Option<Vec<u8>>
         Ok(_) => {},
         Err(e) => {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
-                println!("Failed to send data: {}", e);
+                println!("Failed to send data 16: {}", e);
             } else {
-                println!("Failed to send data: {}", e);
+                println!("Failed to send data 12: {}", e);
             }
             exit(1);
         }
@@ -70,30 +70,35 @@ pub fn send_message(mut stream: &TcpStream, message: Message, data: Option<Vec<u
     let serialized_size = serialized_size_message + data_size;
 
     println!("serialized_message: {:?}", serialized_size);
-    let compact_all = match data {
-        Some(data) => {
-            let serialized_size_bytes = &serialized_size.to_be_bytes() as &[u8];
-            let serialized_size_message_bytes = &serialized_size_message.to_be_bytes() as &[u8];
-            let serialized_bytes = serialized.as_bytes();
-            [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes, &data].concat()
-        },
-        None => {
-            let serialized_size_bytes = &serialized_size.to_be_bytes() as &[u8];
-            let serialized_size_message_bytes = &serialized_size_message.to_be_bytes() as &[u8];
-            let serialized_bytes = serialized.as_bytes();
-            [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes].concat()
-        }
-    };
-    match stream.write_all(&compact_all) {
+    let serialized_size_bytes = &serialized_size.to_be_bytes() as &[u8];
+    let serialized_size_message_bytes = &serialized_size_message.to_be_bytes() as &[u8];
+    let serialized_bytes = serialized.as_bytes();
+    let compact = [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes].concat();
+    match stream.write_all(&compact) {
         Ok(_) => {}
         Err(e) => {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
-                println!("Failed to send data: {}", e);
+                println!("Failed to send data 23: {}", e);
             } else {
-                println!("Failed to send data: {}", e);
+                println!("Failed to send data 123: {}", e);
                 exit(0);
             }
         }
     };
+    if !data.is_none() {
+        match stream.write_all(&data.unwrap()) {
+            Ok(_) => {
+                println!("data sent");
+            }
+            Err(e) => {
+                if e.kind() == std::io::ErrorKind::UnexpectedEof {
+                    println!("Failed to send data 23: {}", e);
+                } else {
+                    println!("Failed to send data 12: {}", e);
+                    exit(0);
+                }
+            }
+        };
+    }
 }
 
