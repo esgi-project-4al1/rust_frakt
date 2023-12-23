@@ -21,7 +21,7 @@ impl<T> ClojureTcpStream<T> {
         }
     }
 
-    pub fn call(&self, diamond: T, data: Option<(Vec<u8>)>) {
+    pub fn call(&self, diamond: T, data: Option<Vec<u8>>) {
         if data.is_some() {
             (self.func)(diamond, data);
         }
@@ -83,10 +83,10 @@ pub fn read_message(stream: &mut TcpStream) -> (Option<Message>, Option<Vec<u8>>
     return (Some(json_object), Some(data));
 }
 
-pub fn send_message(mut stream: &mut TcpStream, message: Message, data: Option<Vec<u8>>) -> &mut TcpStream {
+pub fn send_message(stream: &mut TcpStream, message: Message, data: Option<Vec<u8>>) -> &mut TcpStream {
     let data_not_exists = data.is_none();
     let serialized = serde_json::to_string(&message).expect("failed to serialize object");
-    let serialized_size_message = serialized.len() as u32;
+    let serialized_size_message = serialized.len() as u32 ;
     let data_size = match data {
         Some(ref data) => data.len() as u32,
         None => 0,
@@ -114,7 +114,7 @@ pub fn send_message(mut stream: &mut TcpStream, message: Message, data: Option<V
         send_byte_with_tcp_stream(stream, Some(compact));
     } else {
         let address = String::from("localhost:8787");
-        let clojure = ClojureTcpStream::new(move |address, data| {
+        let clojure = ClojureTcpStream::new(move |address, _data| {
             connect_to_server(address, compact.clone());
         });
         clojure.call(address, data);
