@@ -160,7 +160,8 @@ pub struct FragmentTask {
 pub struct FragmentResult {
     pub id: U8Data,
     pub resolution: Resolution,
-    pub pixel: PixelData,
+    pub range: Range,
+    pub pixels: PixelData,
 
 }
 
