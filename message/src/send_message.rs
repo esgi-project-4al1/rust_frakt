@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use image::EncodableLayout;
 
-use crate::message::{Message};
+use crate::message::Message;
 
 pub struct ClojureTcpStream<T> {
     func: Rc<dyn Fn(T, Option<Vec<u8>>)>,
@@ -22,10 +22,9 @@ impl<T> ClojureTcpStream<T> {
     }
 
     pub fn call(&self, diamond: T, data: Option<(Vec<u8>)>) {
-         if data.is_some() {
-             (self.func)(diamond, data);
-         }
-
+        if data.is_some() {
+            (self.func)(diamond, data);
+        }
     }
 }
 
@@ -86,27 +85,27 @@ pub fn read_message(stream: &mut TcpStream) -> (Option<Message>, Option<Vec<u8>>
 
 pub fn send_message(mut stream: &mut TcpStream, message: Message, data: Option<Vec<u8>>) -> &mut TcpStream {
     let data_not_exists = data.is_none();
-    let message = match message {
-        Message::FragmentResult(mut result) =>{
-            Message::FragmentResult(result.update_offset())
-        } ,
-        _ => message,
-    };
     let serialized = serde_json::to_string(&message).expect("failed to serialize object");
     let serialized_size_message = serialized.len() as u32;
     let data_size = match data {
         Some(ref data) => data.len() as u32,
         None => 0,
     };
-    let serialized_size = serialized_size_message + data_size;
-    let serialized_size_bytes = &serialized_size.to_be_bytes() as &[u8];
+    let serialized_size_total = serialized_size_message + data_size;
+    let message = match message {
+        Message::FragmentResult(mut result) => {
+            Message::FragmentResult(result.update_offset(serialized_size_message + 32 * 2))
+        }
+        _ => message,
+    };
+    let serialized = serde_json::to_string(&message).expect("failed to serialize object");
+    let serialized_size_message = serialized.len() as u32;
     let serialized_size_message_bytes = &serialized_size_message.to_be_bytes() as &[u8];
+    let serialized_size_bytes = &serialized_size_total.to_be_bytes() as &[u8];
     let serialized_bytes = serialized.as_bytes();
-
     let compact: Vec<u8> = if data_not_exists {
         [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes].concat()
     } else {
-
         [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes, &data.clone().unwrap()].concat()
     };
 
@@ -114,12 +113,11 @@ pub fn send_message(mut stream: &mut TcpStream, message: Message, data: Option<V
     if data_not_exists {
         send_byte_with_tcp_stream(stream, Some(compact));
     } else {
-
         let address = String::from("localhost:8787");
-        let clojure = ClojureTcpStream::new(move |  address, data| {
+        let clojure = ClojureTcpStream::new(move |address, data| {
             connect_to_server(address, compact.clone());
         });
-        clojure.call( address , data);
+        clojure.call(address, data);
     }
     stream
 }
@@ -129,10 +127,10 @@ pub fn connect_to_server(address: String, data: Vec<u8>) {
     let stream = TcpStream::connect(address);
     match stream {
         Ok(stream) => {
-            let clojure = ClojureTcpStream::new(|  stream, data| {
-                send_byte_with_tcp_stream( stream, data);
+            let clojure = ClojureTcpStream::new(|stream, data| {
+                send_byte_with_tcp_stream(stream, data);
             });
-            clojure.call( &stream , Some(data));
+            clojure.call(&stream, Some(data));
         }
         Err(_err) => {
             println!("Cannot connect: {}", _err);
@@ -141,7 +139,7 @@ pub fn connect_to_server(address: String, data: Vec<u8>) {
     }
 }
 
-fn send_byte_with_tcp_stream( mut stream: &TcpStream, compact: Option<Vec<u8>>) {
+fn send_byte_with_tcp_stream(mut stream: &TcpStream, compact: Option<Vec<u8>>) {
     match compact {
         Some(compact) => {
             match stream.write_all(compact.as_bytes()) {

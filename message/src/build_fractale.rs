@@ -1,7 +1,7 @@
 use std::process::exit;
 
 use crate::img::save_fractal_image;
-use crate::message::{FractalDescriptor, FragmentResult, FragmentTask, PixelData};
+use crate::message::{FractalDescriptor, FragmentResult, FragmentTask, PixelData, U8Data};
 
 impl FragmentTask {
     pub fn calculate_fractal(&self) -> FragmentResult {
@@ -20,7 +20,10 @@ impl FragmentTask {
         };
         Self::save_fractal_image(self, result_vec_u8.clone());
         return FragmentResult {
-            id: self.id.clone(),
+            id: U8Data {
+                offset: 0,
+                count: self.id.count-1,
+            },
             resolution: self.resolution.clone(),
             range: self.range.clone(),
             pixels: PixelData::create_pixel_data(result_vec_u8, Some(self.id.count)),
@@ -55,22 +58,22 @@ impl PixelData {
         };
     }
 
-    fn update_offset(&mut self, message_size: u32) -> PixelData {
+    fn update_offset(&mut self, serialized_size_total: u32) -> PixelData {
         return PixelData {
-            offset: message_size + 8 + 8,
-            count: self.count.clone(),
+            offset: serialized_size_total,
+            count: self.count,
         };
     }
 }
 
 
 impl FragmentResult {
-    pub fn update_offset(&mut self) -> FragmentResult {
+    pub fn update_offset(&mut self, offset: u32) -> FragmentResult {
         return FragmentResult {
             id: self.id.clone(),
             range: self.range.clone(),
             resolution: self.resolution.clone(),
-            pixels: self.pixels.update_offset(self.id.count),
+            pixels: self.pixels.update_offset(offset ),
         };
     }
 }
