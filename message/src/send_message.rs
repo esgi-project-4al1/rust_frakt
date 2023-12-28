@@ -104,29 +104,32 @@ pub fn send_message(stream: &mut TcpStream, message: Message, data: Option<Vec<u
 
     if data_not_exists {
         send_byte_with_tcp_stream(stream, Some(compact));
+        return stream;
     } else {
-        let address = String::from("localhost:8787");
-        let clojure = ClojureTcpStream::new(move |address, _data| {
-            connect_to_server(address, compact.clone());
-        });
-        clojure.call(address, data);
+        let address = "localhost:8787".to_string();
+        match connect_to_server(address) {
+            Ok(server) => {
+                send_byte_with_tcp_stream(server, Some(compact));
+                return server;
+            }
+            Err(err) => {
+                println!("{}", err);
+                exit(1);
+            }
+        }
+
     }
-    stream
+
 }
 
-pub fn connect_to_server(address: String, data: Vec<u8>) {
-    let stream = TcpStream::connect(address);
-    match stream {
+pub fn connect_to_server(address: String) -> Result<&'static mut TcpStream, String> {
+    match TcpStream::connect(address) {
         Ok(stream) => {
-            let clojure = ClojureTcpStream::new(|stream, data| {
-                send_byte_with_tcp_stream(stream, data);
-            });
-            clojure.call(&stream, Some(data));
+            let boxed_stream = Box::new(stream);
+            let stream_ref = Box::leak(boxed_stream);
+            Ok(stream_ref)
         }
-        Err(_err) => {
-            println!("Cannot connect: {}", _err);
-            exit(1);
-        }
+        Err(err) => Err(format!("Cannot connect: {}", err)),
     }
 }
 

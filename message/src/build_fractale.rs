@@ -1,4 +1,5 @@
 use image::EncodableLayout;
+use crate::build_mandelbrot::calculate_mandelbrot;
 
 use crate::message::{FractalDescriptor, FragmentResult, FragmentTask, JuliaDescriptor, PixelData, PixelIntensity, U8Data};
 
@@ -7,6 +8,7 @@ impl FragmentTask {
         let result_vec_u8: (Vec<u8>, u32) = match self.fractal {
             FractalDescriptor::IteratedSinZ(_) => {
                 //TODO
+                println!("IteratedSinZ");
                 (Vec::new(), 0)
             }
             FractalDescriptor::Julia(julia) => {
@@ -17,8 +19,11 @@ impl FragmentTask {
                 )
             }
             FractalDescriptor::Mandelbrot(_) => {
-                //TODO
-                (Vec::new(), 0)
+                let mandelbrot_pixel_intensity = Self::calculate_fractal_mandelbrot(self);
+                (
+                    Self::transform_vec_pixel_intensity_to_vec_u8(self, mandelbrot_pixel_intensity.clone()),
+                    mandelbrot_pixel_intensity.len() as u32
+                )
             }
         };
 
@@ -38,6 +43,10 @@ impl FragmentTask {
 
     fn calculate_fractal_julia(&self, julia_descriptor: JuliaDescriptor) -> Vec<PixelIntensity> {
         return julia_descriptor.calculate(self.max_iteration, self.resolution.clone(), self.range.clone());
+    }
+
+    fn calculate_fractal_mandelbrot(&self) -> Vec<PixelIntensity> {
+        return calculate_mandelbrot(self.max_iteration, self.resolution.clone(), self.range.clone());
     }
 
     fn transform_vec_pixel_intensity_to_vec_u8(&self, vec_pixel_intensity: Vec<PixelIntensity>) -> Vec<u8> {

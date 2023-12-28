@@ -14,7 +14,6 @@ fn on_message_send_result(_stream: &mut TcpStream, message_send: Message, data: 
 }
 
 fn loop_message(mut stream: &mut TcpStream) {
-    on_message_send_request(stream);
     loop {
         let (message_option, id_data) = read_message(stream);
         match message_option {
@@ -25,11 +24,10 @@ fn loop_message(mut stream: &mut TcpStream) {
                         let message_send: Message = Message::FragmentResult(fragment_result);
                         stream = on_message_send_result(stream, message_send, Some(data_result));
                     }
-                    Message::FragmentRequest(request) => {
-                        println!("request: {:?}", request);
-                    }
-                    Message::FragmentResult(result) => {
-                        println!("result: {:?}", result);
+
+                    _ => {
+                        println!("Is not a client message");
+                        exit(200);
                     }
                 }
             },
@@ -47,6 +45,7 @@ fn main() {
     let stream = TcpStream::connect(address);
     match stream {
         Ok(mut stream) => {
+            on_message_send_request(&mut stream);
             loop_message(&mut stream);
         }
         Err(_err) =>{
