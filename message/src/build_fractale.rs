@@ -1,96 +1,73 @@
-use std::process::exit;
+use image::EncodableLayout;
 
-use crate::img::save_fractal_image;
-use crate::message::{FractalDescriptor, FragmentResult, FragmentTask, PixelData, U8Data};
+use crate::message::{FractalDescriptor, FragmentResult, FragmentTask, JuliaDescriptor, PixelData, PixelIntensity, U8Data};
 
 impl FragmentTask {
-    pub fn calculate_fractal(&self) -> FragmentResult {
-        let result_vec_u8: Vec<u8> = match self.fractal {
+    pub fn calculate_fractal(&self, data_id: Vec<u8>) -> (FragmentResult, Vec<u8>) {
+        let result_vec_u8: (Vec<u8>, u32) = match self.fractal {
             FractalDescriptor::IteratedSinZ(_) => {
                 //TODO
-                Vec::new()
+                (Vec::new(), 0)
             }
-            FractalDescriptor::Julia(_) => {
-                Self::calculate_fractal_julia(self)
+            FractalDescriptor::Julia(julia) => {
+                let julia_pixel_intensity = Self::calculate_fractal_julia(self, julia);
+                (
+                    Self::transform_vec_pixel_intensity_to_vec_u8(self, julia_pixel_intensity.clone()),
+                    julia_pixel_intensity.len() as u32
+                )
             }
             FractalDescriptor::Mandelbrot(_) => {
                 //TODO
-                Vec::new()
+                (Vec::new(), 0)
             }
         };
-        Self::save_fractal_image(self, result_vec_u8.clone());
-        return FragmentResult {
-            id: U8Data {
-                offset: 0,
-                count: self.id.count-1,
+
+        return (
+            FragmentResult {
+                id: U8Data {
+                    offset: 0,
+                    count: self.id.count,
+                },
+                resolution: self.resolution.clone(),
+                range: self.range.clone(),
+                pixels: PixelData::create_pixel_data(result_vec_u8.1.clone(), Some(self.id.count)),
             },
-            resolution: self.resolution.clone(),
-            range: self.range.clone(),
-            pixels: PixelData::create_pixel_data(result_vec_u8, Some(self.id.count)),
-        };
+            [data_id.as_bytes(), result_vec_u8.0.as_bytes()].concat()
+        );
     }
 
-    fn calculate_fractal_julia(&self) -> Vec<u8> {
-        return match self.fractal {
-            FractalDescriptor::Julia(julia) => julia.calculate(self.max_iteration, self.resolution.clone(), self.range.clone()),
-            _ => {
-                println!("Not a Julia fractal");
-                exit(100);
-            }
-        };
+    fn calculate_fractal_julia(&self, julia_descriptor: JuliaDescriptor) -> Vec<PixelIntensity> {
+        return julia_descriptor.calculate(self.max_iteration, self.resolution.clone(), self.range.clone());
     }
 
+    fn transform_vec_pixel_intensity_to_vec_u8(&self, vec_pixel_intensity: Vec<PixelIntensity>) -> Vec<u8> {
+        return vec_pixel_intensity
+            .iter()
+            .flat_map(|pixel_intensity| {
+                let zn = pixel_intensity.zn;
+                let count = pixel_intensity.count;
 
-    fn save_fractal_image(&self, vec_data: Vec<u8>) {
-        save_fractal_image(vec_data, self.resolution.clone(), "fractal.png");
+                let zn_bytes = zn.to_le_bytes();
+                let count_bytes = count.to_le_bytes();
+
+                let result_zn: Vec<u8> = zn_bytes.iter().rev().copied().collect();
+                let result_count: Vec<u8> = count_bytes.iter().rev().copied().collect();
+
+                let mut vec_u8: Vec<u8> = Vec::new();
+                vec_u8.extend_from_slice(&result_zn);
+                vec_u8.extend_from_slice(&result_count);
+                vec_u8
+            })
+            .collect();
     }
 }
 
 
 impl PixelData {
-    pub(crate) fn create_pixel_data(pixels: Vec<u8>, offset: Option<u32>) -> PixelData {
+    pub(crate) fn create_pixel_data(pixels: u32, offset: Option<u32>) -> PixelData {
         return PixelData {
-            offset: match offset {
-                Some(value) => value,
-                None => 0,
-            },
-            count: pixels.len() as u32,
+            offset: offset.unwrap_or_else(|| 0),
+            count: pixels,
         };
-    }
-
-    fn update_offset(&mut self, serialized_size_total: u32) -> PixelData {
-        return PixelData {
-            offset: serialized_size_total,
-            count: self.count,
-        };
-    }
-}
-
-
-impl FragmentResult {
-    pub fn update_offset(&mut self, offset: u32) -> FragmentResult {
-        return FragmentResult {
-            id: self.id.clone(),
-            range: self.range.clone(),
-            resolution: self.resolution.clone(),
-            pixels: self.pixels.update_offset(offset ),
-        };
-    }
-}
-
-
-#[cfg(test)]
-mod tests {
-    use crate::build_fractale::FragmentResult;
-    use crate::message::FragmentTask;
-
-    #[test]
-    fn test_fragment_task_calculate_fractal() {
-        let message_json = r#"{"id":{"offset":0,"count":8},"fractal":{"Julia":{"c":{"re":0.0,"im":0.1},"divergence_threshold_square":0.0}},"max_iteration":0,"resolution":{"nx":160,"ny":120},"range":{"min":{"x":0.0,"y":0.0},"max":{"x":1.0,"y":1.0}}}"#;
-        let expected_result = r#"{"id":{"offset":0,"count":8},"resolution":{"nx":160,"ny":120},"pixel":{"offset":8,"count":19200}}"#;
-        let fragment_task: FragmentTask = serde_json::from_str(message_json).unwrap();
-        let fragment_result: FragmentResult = serde_json::from_str(expected_result).unwrap();
-        let fragment_result_expected: FragmentResult = fragment_task.calculate_fractal();
-        assert_eq!(fragment_result, fragment_result_expected);
     }
 }

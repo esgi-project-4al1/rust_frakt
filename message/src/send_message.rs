@@ -79,36 +79,28 @@ pub fn read_message(stream: &mut TcpStream) -> (Option<Message>, Option<Vec<u8>>
     let mut data = vec![0; data_size as usize];
     to_stream_read_exact(stream, &mut data);
 
-
     return (Some(json_object), Some(data));
 }
 
 pub fn send_message(stream: &mut TcpStream, message: Message, data: Option<Vec<u8>>) -> &mut TcpStream {
     let data_not_exists = data.is_none();
     let serialized = serde_json::to_string(&message).expect("failed to serialize object");
-    let serialized_size_message = serialized.len() as u32 ;
-    let data_size = match data {
-        Some(ref data) => data.len() as u32,
-        None => 0,
-    };
-    let serialized_size_total = serialized_size_message + data_size;
-    let message = match message {
-        Message::FragmentResult(mut result) => {
-            Message::FragmentResult(result.update_offset(serialized_size_message + 32 * 2))
-        }
-        _ => message,
-    };
-    let serialized = serde_json::to_string(&message).expect("failed to serialize object");
     let serialized_size_message = serialized.len() as u32;
+    let data_size = data.as_ref().map(|data| data.len() as u32).unwrap_or(0);
+    let serialized_size_total = serialized_size_message + data_size;
     let serialized_size_message_bytes = &serialized_size_message.to_be_bytes() as &[u8];
     let serialized_size_bytes = &serialized_size_total.to_be_bytes() as &[u8];
     let serialized_bytes = serialized.as_bytes();
+
     let compact: Vec<u8> = if data_not_exists {
         [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes].concat()
     } else {
-        [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes, &data.clone().unwrap()].concat()
+        if let Some(data) = &data {
+            [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes, data].concat()
+        } else {
+            [serialized_size_bytes, serialized_size_message_bytes, serialized_bytes].concat()
+        }
     };
-
 
     if data_not_exists {
         send_byte_with_tcp_stream(stream, Some(compact));
@@ -121,7 +113,6 @@ pub fn send_message(stream: &mut TcpStream, message: Message, data: Option<Vec<u
     }
     stream
 }
-
 
 pub fn connect_to_server(address: String, data: Vec<u8>) {
     let stream = TcpStream::connect(address);

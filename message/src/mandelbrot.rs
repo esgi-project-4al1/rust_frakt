@@ -62,6 +62,5 @@ mod tests {
 
         let pixels = generate_mandelbrot(width, height);
         let output_path = "fractal_mandelbrot.png";
-        //save_fractal_image(width, height, pixels, output_path);
     }
 }

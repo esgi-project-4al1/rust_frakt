@@ -1,4 +1,3 @@
-use std::env;
 use std::net::TcpStream;
 use std::process::exit;
 use message::message::{FragmentRequest, Message};
@@ -11,20 +10,20 @@ fn on_message_send_request(_stream: &mut TcpStream) {
 }
 
 fn on_message_send_result(_stream: &mut TcpStream, message_send: Message, data: Option<Vec<u8>>) -> &mut TcpStream {
-    send_message(_stream, message_send, data)
+    return  send_message(_stream, message_send, data);
 }
 
 fn loop_message(mut stream: &mut TcpStream) {
     on_message_send_request(stream);
     loop {
-        let (message_option, data) = read_message(stream);
+        let (message_option, id_data) = read_message(stream);
         match message_option {
             Some(message) => {
                 match message {
                     Message::FragmentTask(task) => {
-                        let fragment_result = task.calculate_fractal();
+                        let (fragment_result, data_result)  = task.calculate_fractal(id_data.unwrap());
                         let message_send: Message = Message::FragmentResult(fragment_result);
-                        stream = on_message_send_result(stream, message_send, data);
+                        stream = on_message_send_result(stream, message_send, Some(data_result));
                     }
                     Message::FragmentRequest(request) => {
                         println!("request: {:?}", request);
@@ -44,15 +43,6 @@ fn loop_message(mut stream: &mut TcpStream) {
 
 
 fn main() {
-    let _args: Vec<String> = env::args().collect();
-    /*let ip_address =  String::from("localhost");//String::from(&args[1]);
-    let address;
-    if args.len() == 4 {
-        let port = String::from(&args[2]);
-        address = ip_address + ":" + &port;
-    } else {
-        address = ip_address + ":7878";
-    }*/
     let address = String::from("localhost:8787");
     let stream = TcpStream::connect(address);
     match stream {

@@ -1,4 +1,4 @@
-use crate::message::{JuliaDescriptor, Range, Resolution};
+use crate::message::{JuliaDescriptor, PixelIntensity, Range, Resolution};
 
 impl JuliaDescriptor {
     fn calculate_escape_time(px: f64, py: f64, julia: &JuliaDescriptor, max_iteration: u32) -> u32 {
@@ -63,13 +63,13 @@ impl JuliaDescriptor {
     }
 
 
-    pub fn calculate(&self, max_iteration: u16, resolution: Resolution, range: Range) -> Vec<u8> {
+    pub fn calculate(&self, max_iteration: u16, resolution: Resolution, range: Range) -> Vec<PixelIntensity> {
         return self.calculate_fractal_julia(max_iteration, resolution, range);
     }
 
 
-    fn calculate_fractal_julia(&self, max_iteration: u16, resolution: Resolution, range: Range) -> Vec<u8> {
-        let mut pixels: Vec<u8> = Vec::new();
+    fn calculate_fractal_julia(&self, max_iteration: u16, resolution: Resolution, range: Range) -> Vec<PixelIntensity> {
+        let mut pixels: Vec<PixelIntensity> = Vec::new();
 
         let nx = resolution.nx;
         let ny = resolution.ny;
@@ -81,55 +81,40 @@ impl JuliaDescriptor {
                 let escape_time = Self::calculate_escape_time(px, py, self, max_iteration as u32);
 
                 let color = Self::map_escape_time_to_color(self, escape_time, max_iteration as u32);
-                pixels.push(color);
+
+                let pixel_intensity = PixelIntensity {
+                    zn: color as f32,
+                    count: escape_time as f32,
+                };
+
+                pixels.push(pixel_intensity);
             }
         }
 
         pixels
     }
 }
+
 #[cfg(test)]
-mod tests {
-    use crate::img::save_fractal_image;
-    use super::*;
-    use crate::message::{Complex, Point};
+mod tests{
+    use crate::message::{Complex, JuliaDescriptor, PixelIntensity, Point, Range, Resolution};
 
     #[test]
-    fn test_calculate_fractal_julia() {
+    fn test_calcule_julia(){
         let julia = JuliaDescriptor {
-            c: Complex { re: -0.9, im: 0.27015 },
+            c: Complex::new( 0.285,  0.013),
             divergence_threshold_square: 4.0,
         };
+        let example = julia.calculate(
+            64,
+            Resolution { nx: 1, ny: 1 },
+            Range { min: Point { x: -1.2, y: -1.2 },max: Point { x: 1.2, y: 1.2 } }
+        );
 
-        let max_iteration = 1000;
-        let resolution = Resolution { nx: 800, ny: 600 };
-        let range = Range {
-            min: Point { x: -1.5, y: -1.0 },
-            max: Point { x: 1.5, y: 1.0 },
-        };
-
-        let pixels = julia.calculate_fractal_julia(max_iteration, resolution.clone(), range);
-        save_fractal_image(pixels.clone(), resolution, "test_fractal_julia.png");
-        assert_eq!(pixels.len(), 480000);
-    }
+        assert_eq!(example.len(), 1);
+        assert_eq!(example[0].count, 1.0);
+        assert_eq!(example[0].zn, 0.018979378);
 
 
-    #[test]
-    fn test_calculate_fractal_julia_with_offset() {
-        let julia = JuliaDescriptor {
-            c: Complex { re: 0.285, im:  0.013 },
-            divergence_threshold_square: 4.0,
-        };
-
-        let max_iteration = 1000;
-        let resolution = Resolution { nx: 800, ny: 600 };
-        let range = Range {
-            min: Point { x: -1.5, y: -1.0 },
-            max: Point { x: 1.5, y: 1.0 },
-        };
-
-        let pixels = julia.calculate_fractal_julia(max_iteration, resolution.clone(), range);
-        save_fractal_image(pixels.clone(), resolution, "test_fractal_julia2.png");
-        assert_eq!(pixels.len(), 480000);
     }
 }
