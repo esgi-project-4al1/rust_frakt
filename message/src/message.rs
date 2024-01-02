@@ -44,6 +44,7 @@ impl Complex {
         }
     }
 
+
     pub fn norm_squared(&self) -> f64 {
         self.re * self.re + self.im * self.im
     }
