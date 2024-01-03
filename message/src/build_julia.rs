@@ -44,7 +44,6 @@ impl JuliaDescriptor {
             count += 1;
             zn_result = z.norm_squared() / self.divergence_threshold_square;
         }
-        println!("{:?} ({}) count: {}", z, zn_result, normalized_count);
         (zn_result, normalized_count)
     }
 }
