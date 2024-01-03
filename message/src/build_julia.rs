@@ -1,4 +1,5 @@
 use std::ops::AddAssign;
+
 use crate::message::{Complex, JuliaDescriptor, PixelIntensity, Range, Resolution};
 
 impl JuliaDescriptor {
@@ -18,8 +19,8 @@ impl JuliaDescriptor {
                 pixels.push(pixel_intensity);
             }
         }
-
         pixels
+
     }
 
     fn calculate_all(&self, mut z: Complex, max_iteration: u16) -> (f64, f64) {
@@ -29,13 +30,17 @@ impl JuliaDescriptor {
         let mut normalized_count: f64 = 0.0;
 
         for _i in 0..max_iterations + 1 {
-            z = z.square().add(self.c);
+            let tmp = z.square().add(self.c);
+            if tmp.re.is_nan() || tmp.im.is_nan()  || tmp.re.is_infinite() || tmp.im.is_infinite() {
+                return (zn_result, normalized_count);
+            }
+            z = tmp;
             normalized_count = count as f64 / max_iterations as f64;
             count += 1;
             zn_result = z.norm_squared() / self.divergence_threshold_square;
-            println!("{}  {:?} ({}) count: {}", _i, z, zn_result, normalized_count);
+            //
         }
-
+        println!("{:?} ({}) count: {}", z, zn_result, normalized_count);
         (zn_result, normalized_count)
     }
 }
