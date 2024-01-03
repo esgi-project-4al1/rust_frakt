@@ -37,6 +37,13 @@ impl Complex {
         }
     }
 
+    pub fn add_i64(self, other: i64) -> Complex {
+        Complex {
+            re: self.re + other as f64,
+            im: self.im,
+        }
+    }
+
     pub fn cube(&self) -> Complex {
         Complex {
             re: self.re * (self.re * self.re - 3.0 * self.im * self.im),
@@ -90,6 +97,7 @@ impl Div<Complex> for Complex {
         Complex::new(real, imag)
     }
 }
+
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Range {
