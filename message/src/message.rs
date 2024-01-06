@@ -43,6 +43,13 @@ impl Complex {
             im: self.im,
         }
     }
+    
+    pub fn sin(self) -> Complex {
+        Complex {
+            re: self.re.sin() * self.im.cosh(),
+            im: self.re.cos() * self.im.sinh(),
+        }
+    }
 
     pub fn cube(&self) -> Complex {
         Complex {
@@ -129,7 +136,7 @@ pub struct PixelIntensity {
     pub count: f32,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct IteratedSinZ {
     pub c: Complex,
 }
@@ -139,6 +146,8 @@ pub struct JuliaDescriptor {
     pub c: Complex,
     pub divergence_threshold_square: f64,
 }
+
+pub struct NewtonRaphsonZn {}
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Mandelbrot {}

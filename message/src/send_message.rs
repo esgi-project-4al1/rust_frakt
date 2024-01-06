@@ -51,7 +51,7 @@ fn to_stream_read_exact(stream: &mut TcpStream, buf: &mut [u8]) {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
                 println!("Failed to send data 16: {}", e);
             } else {
-                println!("Failed to send data 12: {}", e);
+                println!("Failed to send data 12: {} {}", e, buf.len());
             }
             exit(1);
         }

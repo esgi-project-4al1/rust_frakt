@@ -1,16 +1,11 @@
 use image::EncodableLayout;
 use crate::build_mandelbrot::calculate_mandelbrot;
 
-use crate::message::{FractalDescriptor, FragmentResult, FragmentTask, JuliaDescriptor, PixelData, PixelIntensity, U8Data};
+use crate::message::{FractalDescriptor, FragmentResult, FragmentTask, JuliaDescriptor, PixelData, PixelIntensity, U8Data, IteratedSinZ};
 
 impl FragmentTask {
     pub fn calculate_fractal(&self, data_id: Vec<u8>) -> (FragmentResult, Vec<u8>) {
         let result_vec_u8: (Vec<u8>, u32) = match self.fractal {
-            FractalDescriptor::IteratedSinZ(_) => {
-                //TODO
-                println!("IteratedSinZ");
-                (Vec::new(), 0)
-            }
             FractalDescriptor::Julia(julia) => {
                 let julia_pixel_intensity = Self::calculate_fractal_julia(self, julia);
                 (
@@ -23,6 +18,13 @@ impl FragmentTask {
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(self, mandelbrot_pixel_intensity.clone()),
                     mandelbrot_pixel_intensity.len() as u32
+                )
+            }
+            FractalDescriptor::IteratedSinZ(sin_z) => {
+                let sin_z_pixel_intensity = Self::calculate_fractal_iterated_sin_z(self, sin_z);
+                (
+                    Self::transform_vec_pixel_intensity_to_vec_u8(self, sin_z_pixel_intensity.clone()),
+                    sin_z_pixel_intensity.len() as u32
                 )
             }
         };
@@ -43,6 +45,10 @@ impl FragmentTask {
 
     fn calculate_fractal_julia(&self, julia_descriptor: JuliaDescriptor) -> Vec<PixelIntensity> {
         return julia_descriptor.calculate(self.max_iteration, self.resolution.clone(), self.range.clone());
+    }
+
+    fn calculate_fractal_iterated_sin_z(&self, sin_z: IteratedSinZ) -> Vec<PixelIntensity> {
+        return sin_z.compute(self.max_iteration, self.resolution.nx, self.resolution.ny, self.range.clone());
     }
 
     fn calculate_fractal_mandelbrot(&self) -> Vec<PixelIntensity> {

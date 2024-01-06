@@ -1,4 +1,3 @@
-use std::ops::AddAssign;
 
 use crate::message::{Complex, JuliaDescriptor, PixelIntensity, Range, Resolution};
 
@@ -6,7 +5,6 @@ impl JuliaDescriptor {
     pub fn calculate(&self, max_iteration: u16, resolution: Resolution, range: Range) -> Vec<PixelIntensity> {
         let nx = resolution.nx;
         let ny = resolution.ny;
-        let mut count = 0;
         let mut pixels = Vec::new();
         for y in 0..ny {
             for x in 0..nx {
@@ -17,7 +15,7 @@ impl JuliaDescriptor {
                     zn: result_all.0 as f32,
                     count: result_all.1 as f32,
                 };
-                count += 1;
+                
                 pixels.push(pixel_intensity);
             }
         }
