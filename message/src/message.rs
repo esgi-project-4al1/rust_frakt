@@ -23,6 +23,20 @@ impl Complex {
         (self.re * self.re + self.im * self.im).sqrt()
     }
 
+    pub fn sub_reel(self, scalar: f64) -> Complex {
+        Complex {
+            re: self.re - scalar,
+            im: self.im,
+        }
+    }
+
+    pub fn mul_reel(self, scalar: f64) -> Complex {
+        Complex {
+            re: self.re * scalar,
+            im: self.im * scalar,
+        }
+    }
+
     pub fn square(&self) -> Complex {
         Complex {
             re: self.re * self.re - self.im * self.im,
@@ -58,6 +72,24 @@ impl Complex {
         }
     }
 
+    pub fn pow(&self, n: u32) -> Complex {
+        let mut result = Complex::new(self.re, self.im);
+
+        for _ in 1..n {
+            let temp_re = result.re * self.re - result.im * self.im;
+            let temp_im = result.re * self.im + result.im * self.re;
+
+            result.re = temp_re;
+            result.im = temp_im;
+        }
+
+        result
+    }
+    
+
+    pub fn arg(&self) -> f64 {
+        self.im.atan2(self.re)
+    }
 
     pub fn norm_squared(&self) -> f64 {
         self.re * self.re + self.im * self.im
@@ -146,10 +178,19 @@ pub struct JuliaDescriptor {
     pub c: Complex,
     pub divergence_threshold_square: f64,
 }
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
+pub struct NewtonRaphsonZ3 {}
 
-pub struct NewtonRaphsonZn {}
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Copy)]
+pub struct NewtonRaphsonZ4 {}
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
+pub struct NovaNewtonRaphsonZ3 {}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
+pub struct NovaNewtonRaphsonZ4 {}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct Mandelbrot {}
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -157,6 +198,10 @@ pub enum FractalDescriptor {
     IteratedSinZ(IteratedSinZ),
     Julia(JuliaDescriptor),
     Mandelbrot(Mandelbrot),
+    NewtonRaphsonZ3(NewtonRaphsonZ3),
+    NewtonRaphsonZ4(NewtonRaphsonZ4),
+    NovaNewtonRaphsonZ3(NovaNewtonRaphsonZ3),
+    NovaNewtonRaphsonZ4(NovaNewtonRaphsonZ4),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

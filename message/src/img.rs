@@ -1,8 +1,6 @@
 use image::{ImageBuffer, Rgb};
 use crate::message::Resolution;
 
-
-
 pub fn save_fractal_image(pixels: Vec<u8>, resolution: Resolution, filename: &str) {
     let width = resolution.nx.clone() as u32;
     let height = resolution.ny.clone() as u32;
