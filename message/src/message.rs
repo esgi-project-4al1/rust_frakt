@@ -1,6 +1,7 @@
 use std::ops::{Add, Div, Mul, Sub};
 use serde::{Deserialize, Serialize};
 
+
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct Point {
     pub x: f64,
@@ -17,10 +18,6 @@ pub struct Complex {
 impl Complex {
     pub fn new(re: f64, im: f64) -> Complex {
         Complex { re, im }
-    }
-
-    pub fn norm(&self) -> f64 {
-        (self.re * self.re + self.im * self.im).sqrt()
     }
 
     pub fn sub_reel(self, scalar: f64) -> Complex {
@@ -73,19 +70,12 @@ impl Complex {
     }
 
     pub fn pow(&self, n: u32) -> Complex {
-        let mut result = Complex::new(self.re, self.im);
-
-        for _ in 1..n {
-            let temp_re = result.re * self.re - result.im * self.im;
-            let temp_im = result.re * self.im + result.im * self.re;
-
-            result.re = temp_re;
-            result.im = temp_im;
+        let mut result = Complex::new(1.0, 0.0);
+        for _ in 0..n {
+            result = result * *self;
         }
-
         result
     }
-    
 
     pub fn arg(&self) -> f64 {
         self.im.atan2(self.re)
@@ -94,7 +84,12 @@ impl Complex {
     pub fn norm_squared(&self) -> f64 {
         self.re * self.re + self.im * self.im
     }
+
+    pub fn norm(&self) -> f64 {
+        (self.re * self.re + self.im * self.im).sqrt()
+    }
 }
+
 impl Add for Complex {
     type Output = Complex;
 

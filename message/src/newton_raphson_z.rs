@@ -6,49 +6,46 @@ use crate::message::{Complex, NewtonRaphsonZ3, NewtonRaphsonZ4, PixelIntensity, 
 impl NewtonRaphsonZ3 {
     pub fn calculate_fractal_newton_raphson_z3(&self, max_iteration: u16, resolution : Resolution, range: Range) -> Vec<PixelIntensity> {
         let mut pixels = Vec::new();
-        let nx = resolution.nx;
-        let ny = resolution.ny;
+        let width = resolution.nx;
+        let height = resolution.ny;
+    
+        for y in 0..height {
+            for x in 0..width {
+                let x_frac = x as f64 / width as f64 * (range.max.x - range.min.x) + range.min.x;
+                let y_frac = y as f64 / height as f64 * (range.max.y - range.min.y) + range.min.y;
+    
+                let initial_z = Complex::new(x_frac, y_frac);
 
-        for y in 0..ny {
-            for x in 0..nx {
-                let x_frac = x as f64 / nx as f64 * (range.max.x - range.min.x) + range.min.x;
-                let y_frac = y as f64 / ny as f64 * (range.max.y - range.min.y) + range.min.y;
-                let z0 = Complex::new(x_frac, y_frac);
-
-                let (zn, count) = self.compute_pixel_z3(z0);
-                //print!("zn = {} , im = {}\n", z0.re ,z0.im);
+                let (zn, count) = self.compute_pixel_z3(initial_z, max_iteration);
                 let intensity = PixelIntensity {
                     zn: (0.5 + (zn.arg() / (2.0 * PI))) as f32,
                     count: (count / max_iteration as f64 ) as f32, 
                 };
-                
                 pixels.push(intensity);
             }
         }
         pixels
     }
 
-    fn compute_pixel_z3(&self, mut zn: Complex) -> (Complex, f64) {
+    fn compute_pixel_z3(&self, mut zn: Complex, max_iteration: u16) -> (Complex, f64) {
         let mut count = 0;
         let epsilon = 0.000001;
         
         while {
-            let zn_new = zn - (zn.pow(3).sub_reel(-1.0)) / zn.pow(2).mul_reel(3.0);
-            let distance_squared = (zn_new - zn).norm();
+            let zn_new = zn - ((zn.pow(3).sub_reel(-1.0)) / (zn.pow(2).mul_reel(3.0)));
+            let distance_squared = (zn_new - zn).norm_squared();
             zn = zn_new;
-            
-            distance_squared >= epsilon
+            distance_squared >= epsilon && count < max_iteration
         } {
             count += 1;
         }
-        //print!("zn = {} , im = {}\n", zn.re ,zn.im);
         (zn, count as f64)
     }
+    
 
 }
 
 impl NewtonRaphsonZ4 {
-    
     
     pub fn calculate_fractal_newton_raphson_z4(&self, max_iteration: u16, resolution : Resolution, range: Range) -> Vec<PixelIntensity> {
         let mut pixels = Vec::new();
@@ -61,12 +58,8 @@ impl NewtonRaphsonZ4 {
                 let y_frac = y as f64 / ny as f64 * (range.max.y - range.min.y) + range.min.y;
                 let z0 = Complex::new(x_frac, y_frac);
                 
-                 if x_frac == 0.0 {
-                    print!("xfrac = {} , im = {}\n", x_frac ,y_frac);
-                 }           
-                
                 let (zn, count) = self.compute_pixel_z4(z0, max_iteration);
-                //print!("zn = {} , im = {}\n", z0.re ,z0.im);
+                
                 let intensity = PixelIntensity {
                     zn: (0.5 + (zn.arg() / (2.0 * PI))) as f32,
                     count: (count / max_iteration as f64 ) as f32, 
@@ -81,24 +74,23 @@ impl NewtonRaphsonZ4 {
     fn compute_pixel_z4(&self, mut zn: Complex, max_iteration: u16) -> (Complex, f64) {
         let mut count = 0;
         let epsilon = 0.000001;
-
+    
         while {
             let zn_new = zn - (zn.pow(4).sub_reel(-1.0)) / zn.pow(3).mul_reel(4.0);
-            let distance_squared = (zn_new - zn).norm();
+            let distance_squared = (zn_new - zn).norm_squared();
             zn = zn_new;
             distance_squared >= epsilon && count < max_iteration
         } {
-            //print!(" 1 re = {} , im = {} , count = {}\n", zn.re ,zn.im, count);
             count += 1;
         }
         (zn, count as f64)
     }
+    
 }
 
 #[cfg(test)]
 mod tests {
     use crate::message::{Point, Range, Resolution, NewtonRaphsonZ3,NewtonRaphsonZ4};
-
 
     #[test]
     fn test_calculate_fractal_newton_raphsonz3() {
@@ -156,7 +148,7 @@ mod tests {
             }
             print!("zn = {}\n", intensity.zn);
             count+=1;
-            //assert!(intensity.zn >= 0.0 && intensity.zn <= 1.0); // Vérifiez la plage de zn 
+            assert!(intensity.zn >= 0.0 && intensity.zn <= 1.0); // Vérifiez la plage de zn 
             assert!(intensity.count >= 0.0 && intensity.count <= 1.0); // Vérifiez la plage de count
         }
         print!("nombre = {}", count);

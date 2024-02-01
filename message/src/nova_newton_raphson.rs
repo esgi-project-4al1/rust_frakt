@@ -41,7 +41,6 @@ impl NovaNewtonRaphsonZ3 {
             let zn_new = zn - (zn.pow(3).sub_reel(-1.0)) / zn.pow(2).mul_reel(3.0) + c;
             let distance_squared = (zn_new - zn).norm();
             zn = zn_new;
-
             distance_squared >= epsilon && count < max_iteration
         } {
             count += 1;
