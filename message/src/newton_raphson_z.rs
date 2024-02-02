@@ -32,7 +32,7 @@ impl NewtonRaphsonZ3 {
         let epsilon = 0.000001;
         
         while {
-            let zn_new = zn - ((zn.pow(3).sub_reel(-1.0)) / (zn.pow(2).mul_reel(3.0)));
+            let zn_new = zn - ((zn.cube() - Complex::new(1.0, 0.0)) / (zn.square() * Complex::new(3.0, 0.0)));
             let distance_squared = (zn_new - zn).norm_squared();
             zn = zn_new;
             distance_squared >= epsilon && count < max_iteration
@@ -76,7 +76,7 @@ impl NewtonRaphsonZ4 {
         let epsilon = 0.000001;
     
         while {
-            let zn_new = zn - (zn.pow(4).sub_reel(-1.0)) / zn.pow(3).mul_reel(4.0);
+            let zn_new = zn - (zn.pow4() - Complex::new(1.0, 0.0)) / (zn.cube() * Complex::new(4.0, 0.0));
             let distance_squared = (zn_new - zn).norm_squared();
             zn = zn_new;
             distance_squared >= epsilon && count < max_iteration

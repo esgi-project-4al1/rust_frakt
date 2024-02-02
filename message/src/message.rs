@@ -88,6 +88,11 @@ impl Complex {
     pub fn norm(&self) -> f64 {
         (self.re * self.re + self.im * self.im).sqrt()
     }
+
+    pub fn pow4(&self) -> Complex {
+        self.cube() * *self
+    }
+    
 }
 
 impl Add for Complex {
