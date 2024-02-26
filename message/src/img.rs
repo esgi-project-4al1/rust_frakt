@@ -1,6 +1,8 @@
-use image::{ImageBuffer, Rgb};
 use crate::message::Resolution;
+use image::{ImageBuffer, Rgb};
 
+/// Save the fractal image to a file
+#[allow(dead_code)]
 pub fn save_fractal_image(pixels: Vec<u8>, resolution: Resolution, filename: &str) {
     let width = resolution.nx.clone() as u32;
     let height = resolution.ny.clone() as u32;
@@ -12,5 +14,11 @@ pub fn save_fractal_image(pixels: Vec<u8>, resolution: Resolution, filename: &st
         *pixel = Rgb([intensity, intensity, intensity]);
     }
 
-    imgbuf.save(filename).unwrap();
+    let save_image = imgbuf.save(filename);
+    match save_image {
+        Ok(_) => {}
+        Err(e) => {
+            println!("Error: {:?}", e);
+        }
+    }
 }

@@ -1,0 +1,28 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master", "feature/new_server" ]
+  pull_request:
+    branches: [ "master", "feature/new_server"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run tests
+        run: cargo test --verbose
+
+      - name: Verify formatting
+        run: cargo fmt -- --check
+
+      - name: Create documentation
+        run: cargo doc --no-deps
+
+
