@@ -1,5 +1,6 @@
 use std::net::{TcpListener, TcpStream};
 use std::process::exit;
+use message::drawing_image;
 
 use message::message::{Message, PixelIntensity};
 use message::send_message::{read_message, send_message};
@@ -7,7 +8,6 @@ use message::send_message::{read_message, send_message};
 use crate::fragment_task::{create_identification, RangeManager, RangeManagerTrait};
 use crate::thread_pool_server::ThreadPool;
 
-mod drawing_image;
 mod fragment_task;
 mod thread_pool_server;
 
@@ -90,6 +90,7 @@ fn loop_message(stream: &mut TcpStream, mut number: u8) {
                         fragment_result.resolution.nx as u32,
                         fragment_result.resolution.ny as u32,
                         &pixel_intensity_vec,
+                        "fractal.png".to_string(),
                     );
                     number += 1;
                     let fragment_task = RangeManager::new().get_current_range(number);

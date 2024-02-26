@@ -1,10 +1,10 @@
 extern crate image;
 
-use message::message::PixelIntensity;
+use crate::message::PixelIntensity;
 
 /// Create the image from the pixel intensity
 /// and save it to a file
-pub fn create_image(width: u32, height: u32, pixel_intensity_vec: &Vec<PixelIntensity>) {
+pub fn create_image(width: u32, height: u32, pixel_intensity_vec: &Vec<PixelIntensity>, filename: String) {
     let image_width = width;
     let image_height = height;
 
@@ -17,7 +17,7 @@ pub fn create_image(width: u32, height: u32, pixel_intensity_vec: &Vec<PixelInte
         count += 1;
     }
 
-    let save = image_buffer.save("julia.png");
+    let save = image_buffer.save(filename);
     match save {
         Ok(_) => {}
         Err(e) => {

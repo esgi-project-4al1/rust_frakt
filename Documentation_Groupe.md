@@ -23,6 +23,16 @@ Vous pouvez le lancer avec
     cargo run --bin server
 ```
 
+Génération de la documentation
+```bash
+cargo doc --open
+```
+
+Lancement des tests
+```bash
+cargo test
+```
+
 ## Bonus en plus
 
 # Bonus possibles :
@@ -47,3 +57,5 @@ Nous avons utilisé une implémentation d'un closure pour le Tcpstream, pour le 
 les unwrap(), les expect(), les panic!()
 
 Nous avons utilisé des match pour les erreurs.
+
+Nous avons aussi générer des images cotés serveur et client.
