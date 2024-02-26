@@ -275,6 +275,10 @@ liste des *crates* autorisés.
 * `serde` pour le transfert des données
 * Mise en place de tests unitaires et d'intégration
 
+
+
+
+
 <!-- for PDF export using pandoc
 ---
 title: "Project Rust"
