@@ -6,6 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/client/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/message/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/colormap/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/complex/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/client/target" />
       <excludeFolder url="file://$MODULE_DIR$/message/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
