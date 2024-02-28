@@ -22,7 +22,4 @@ jobs:
       - name: Verify formatting
         run: cargo fmt -- --check
 
-      - name: Create documentation
-        run: cargo doc --no-deps
-
 
