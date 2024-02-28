@@ -1,10 +1,10 @@
+use crate::drawing_image::create_image;
 use crate::message::{
     FractalDescriptor, FragmentResult, FragmentTask, IteratedSinZ, JuliaDescriptor, Mandelbrot,
     NewtonRaphsonZ3, NewtonRaphsonZ4, NovaNewtonRaphsonZ3, NovaNewtonRaphsonZ4, PixelData,
     PixelIntensity, U8Data,
 };
 use image::EncodableLayout;
-use crate::drawing_image::create_image;
 
 /// Implementation of the FragmentTask struct. Is just a wrapper around the FractalDescriptor
 /// and the parameters to calculate the fractal. Is Builder pattern.
@@ -15,7 +15,12 @@ impl FragmentTask {
         let result_vec_u8: (Vec<u8>, u32) = match self.fractal {
             FractalDescriptor::Julia(julia) => {
                 let julia_pixel_intensity = Self::calculate_fractal_julia(self, julia);
-                create_image(self.resolution.nx.clone() as u32, self.resolution.ny.clone() as u32, &julia_pixel_intensity, "julia.png".to_string());
+                create_image(
+                    self.resolution.nx.clone() as u32,
+                    self.resolution.ny.clone() as u32,
+                    &julia_pixel_intensity,
+                    "julia.png".to_string(),
+                );
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(
                         self,
@@ -27,7 +32,12 @@ impl FragmentTask {
             FractalDescriptor::Mandelbrot(mandelbrot) => {
                 let mandelbrot_pixel_intensity =
                     Self::calculate_fractal_mandelbrot(self, mandelbrot);
-                create_image(self.resolution.nx.clone() as u32, self.resolution.ny.clone() as u32, &mandelbrot_pixel_intensity, "mandelbrot.png".to_string());
+                create_image(
+                    self.resolution.nx.clone() as u32,
+                    self.resolution.ny.clone() as u32,
+                    &mandelbrot_pixel_intensity,
+                    "mandelbrot.png".to_string(),
+                );
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(
                         self,
@@ -38,7 +48,12 @@ impl FragmentTask {
             }
             FractalDescriptor::IteratedSinZ(sin_z) => {
                 let sin_z_pixel_intensity = Self::calculate_fractal_iterated_sin_z(self, sin_z);
-                create_image(self.resolution.nx.clone() as u32, self.resolution.ny.clone() as u32, &sin_z_pixel_intensity, "sinZ.png".to_string());
+                create_image(
+                    self.resolution.nx.clone() as u32,
+                    self.resolution.ny.clone() as u32,
+                    &sin_z_pixel_intensity,
+                    "sinZ.png".to_string(),
+                );
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(
                         self,
@@ -50,7 +65,12 @@ impl FragmentTask {
             FractalDescriptor::NewtonRaphsonZ3(newton_raphson_z3) => {
                 let newton_raphson_z3_pixel_intensity =
                     Self::calculate_fractal_newton_raphson_z3(self, newton_raphson_z3);
-                create_image(self.resolution.nx.clone() as u32, self.resolution.ny.clone() as u32, &newton_raphson_z3_pixel_intensity, "newtonZ3.png".to_string());
+                create_image(
+                    self.resolution.nx.clone() as u32,
+                    self.resolution.ny.clone() as u32,
+                    &newton_raphson_z3_pixel_intensity,
+                    "newtonZ3.png".to_string(),
+                );
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(
                         self,
@@ -62,7 +82,12 @@ impl FragmentTask {
             FractalDescriptor::NewtonRaphsonZ4(newton_raphson_z4) => {
                 let newton_raphson_z4_pixel_intensity =
                     Self::calculate_fractal_newton_raphson_z4(self, newton_raphson_z4);
-                create_image(self.resolution.nx.clone() as u32, self.resolution.ny.clone() as u32, &newton_raphson_z4_pixel_intensity, "newtonZ4.png".to_string());
+                create_image(
+                    self.resolution.nx.clone() as u32,
+                    self.resolution.ny.clone() as u32,
+                    &newton_raphson_z4_pixel_intensity,
+                    "newtonZ4.png".to_string(),
+                );
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(
                         self,
@@ -74,7 +99,12 @@ impl FragmentTask {
             FractalDescriptor::NovaNewtonRaphsonZ3(nova_newton_raphson_z3) => {
                 let nova_newton_raphson_z3_pixel_intensity =
                     Self::calculate_fractal_nova_newton_raphson_z3(self, nova_newton_raphson_z3);
-                create_image(self.resolution.nx.clone() as u32, self.resolution.ny.clone() as u32, &nova_newton_raphson_z3_pixel_intensity, "novaNewtonZ3.png".to_string());
+                create_image(
+                    self.resolution.nx.clone() as u32,
+                    self.resolution.ny.clone() as u32,
+                    &nova_newton_raphson_z3_pixel_intensity,
+                    "novaNewtonZ3.png".to_string(),
+                );
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(
                         self,
@@ -86,7 +116,12 @@ impl FragmentTask {
             FractalDescriptor::NovaNewtonRaphsonZ4(nova_newton_raphson_z4) => {
                 let nova_newton_raphson_z4_pixel_intensity =
                     Self::calculate_fractal_nova_newton_raphson_z4(self, nova_newton_raphson_z4);
-                create_image(self.resolution.nx.clone() as u32, self.resolution.ny.clone() as u32, &nova_newton_raphson_z4_pixel_intensity, "novaNewtonZ4.png".to_string());
+                create_image(
+                    self.resolution.nx.clone() as u32,
+                    self.resolution.ny.clone() as u32,
+                    &nova_newton_raphson_z4_pixel_intensity,
+                    "novaNewtonZ4.png".to_string(),
+                );
                 (
                     Self::transform_vec_pixel_intensity_to_vec_u8(
                         self,

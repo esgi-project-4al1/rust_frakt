@@ -1,6 +1,6 @@
+use message::drawing_image;
 use std::net::{TcpListener, TcpStream};
 use std::process::exit;
-use message::drawing_image;
 
 use message::message::{Message, PixelIntensity};
 use message::send_message::{read_message, send_message};
